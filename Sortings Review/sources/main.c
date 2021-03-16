@@ -89,14 +89,14 @@ int main (){
 
     printRecordArray(records, arr_size);
 
-    int *arr = createRandArray(arr_size);
-    printArray(arr, arr_size);
+    // int *arr = createRandArray(arr_size);
+    // printArray(arr, arr_size);
+    radixSort256(records, arr_size);
     printf("Now sorting the array...\n");
-    printArray(arr, arr_size);
+    // printArray(arr, arr_size);
+    printRecordArray(records, arr_size);
 
-    // printRecordArray(records, arr_size);
-
-    free(arr);
+    // free(arr);
     deallocateRecords(records, arr_size);
 
     return 0;

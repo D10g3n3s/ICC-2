@@ -9,6 +9,18 @@
         char *string;
     } RECORD;
 
+    typedef struct _node NODE;
+
+    struct _node{
+        NODE *next;
+        RECORD elem;
+    };
+
+    typedef struct {
+        NODE *head;
+        NODE *tail;
+    } BUCKET;
+
     void insertionSort(int *array, int length);
     void mergeSort(int *array, int start, int end);
     int startPivot(int start, int end);
@@ -19,8 +31,8 @@
     void descendingHeapSort(int *array, int length);
     void bubbleSort(int *array, int length);
     void cocktailSort(int *array, int length);
-    void countingSort();
-    void bucketSort();
-    void radixSort256();
+    void countingSort(RECORD *records, int length);
+    void bucketSort(RECORD *records, int length);
+    void radixSort256(RECORD *records, int length);
 
 #endif

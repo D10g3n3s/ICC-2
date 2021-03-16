@@ -77,7 +77,7 @@ void mergeSort(int *arr, int start, int end){
     if (end <= start)
         return;
 
-    // Calculating the actual vector size / 2
+    // Calculating the actual array size / 2
     int mid = start + (end - start) / 2;
 
     // Divide
@@ -303,16 +303,152 @@ void descendingHeapSort(int *arr, int length){
 }
 
 // Function that does coutingSort with records
-void countingSort(RECORD *records){
+void countingSort(RECORD *records, int length){
+    // Copy of the original array
+    RECORD *recordsCopy = malloc(length * sizeof(RECORD));
+
+    // Founding the lowest and the biggest value and copying the original array
+    int min, max;
+    max = min = records[0].key;
     
+    for (int i = 0; i < length; i++){
+        if (records[i].key > max)
+            max = records[i].key;
+        if (records[i].key < min)
+            min = records[i].key;
+
+        recordsCopy[i] = records[i];
+    }
+
+    // Allocating the counting array [min, max]
+    int *counting = calloc((max - min) + 1, sizeof(int));
+
+    // Counting the keys
+    for (int i = 0; i < length; i++){
+        int keyPosition = records[i].key - min;
+        counting[keyPosition]++;
+    }
+
+    // Acumulating the count
+    int total = 0;
+    for (int i = 0; i <= (max - min); i++){
+        // Saving the number of keys
+        int prev_count = counting[i];
+        // Acumulated before i
+        counting[i] = total;
+        // Updating the acumulated count
+        total += prev_count;
+    }
+
+    // Walking into the copy array and positioning correctly in the original array
+    for (int i = 0; i < length; i++){
+        int pos_sort = counting[recordsCopy[i].key - min];
+        // Right position into the array
+        records[pos_sort] = recordsCopy[i];
+        // Updating to the next key position
+        counting[recordsCopy[i].key - min]++;
+    }
+
+    free(recordsCopy);
+    free(counting);
 }
 
 // Function that does bucketSort with records
-void BucketSort(RECORD *records){
+void bucketSort(RECORD *records, int length){
+    // Founding the lowest and the biggest values
+    int min, max;
+    max = min = records[0].key;
+    for (int i = 0; i < length; i++){
+        if (records[i].key > max)
+            max = records[i].key;
+        if (records[i].key < min)
+            min = records[i].key;
+    }
 
+    // Allocating the array of queues
+    BUCKET *bucket = calloc((max - min) + 1, sizeof(BUCKET));
+
+    // Filling the buckets
+    for (int i = 0; i < length; i++){
+        int keyPosition = records[i].key - min;
+
+        // Creating a new node
+        NODE *newNode = malloc(sizeof(NODE));
+        newNode->elem = records[i];
+        newNode->next = NULL;
+
+        // Inserting into the queue
+        // If the queue is empty
+        if (bucket[keyPosition].head == NULL)
+            bucket[keyPosition].head = newNode;
+        // When the queue isn't empty adding the new node in the end of the queue
+        else
+            bucket[keyPosition].tail->next = newNode;
+
+        // Changing the last node of the queue
+        bucket[keyPosition].tail = newNode;
+    }
+
+    // Walking into the buckets and positioning into the right place in the original array 
+    int j = 0;
+    for (int i = 0; i <= (max - min); i++){
+        NODE *pos;
+        // Getting the head node of the queue
+        pos = bucket[i].head;
+
+        while(pos != NULL){
+            // Copying the element from the queue to the original array
+            records[j] = pos->elem;
+            j++;
+
+            // Deleting the node from the queue and going to the next one
+            NODE *deletedNode = pos;
+            // Going to the next element of the queue
+            pos = pos->next;
+            // Changing the head of the queue
+            bucket[i].head = pos;
+            free(deletedNode);
+        }
+    }
+
+    free(bucket);
 }
 
 // Function that does radixSort using as a sub routine countingSort or bucketSort and using 256 base
-void radixSort256(){
+void radixSort256(RECORD *records, int length){
+    // Allocating the couting array with k = 256 possible values
+    int counting[256] = {0};
+    // Accumulated count
+    int position[256];
 
+    // Copy of the original array
+    RECORD *recordsCopy = malloc(length * sizeof(RECORD));
+
+    for (int shift = 0; shift <= 24; shift += 8){
+        // Counting sort, counting + copy
+        for (int i = 0; i < length; i++){
+            // Moving and extracting a block of 8 bits
+            short k = (records[i].key >> shift) & 255;
+            // Incrementing and copying
+            counting[k]++;
+            recordsCopy[i] = records[i];
+        }
+    
+        // Acumulated count
+        position[0] = 0;
+        for (int i = 1; i < 256; i++) {
+            position[i] = position[i - 1] + counting[i - 1];
+            // Zeroing the count to the next step
+            counting[i - 1] = 0; 
+        }
+
+        // Copying the elements in the correct position on the original array
+        for (int i = 0; i < length; i++) {
+            short k = (recordsCopy[i].key >> shift) & 255;
+            records[position[k]] = recordsCopy[i];
+            position[k]++;
+        }
+    }
+
+    free(recordsCopy);
 }
