@@ -91,14 +91,20 @@ void mergeSort(int *arr, int start, int end){
 // Function that does bubbleSort 
 void bubbleSort(int *arr, int length){
     int swap;
+    int swapped = 0;
     for (int i = 0; i < length - 1; i++){
         for (int j = 0; j < length - i - 1; j++){
             if (arr[j] > arr[j+1]){
                 swap = arr[j];
                 arr[j] = arr[j+1];
                 arr[j+1] = swap;
+                swapped = 1;
             }
         }
+        
+        // If there is not swapping in the last swap, then the array is already sorted.
+        if (swapped == 0)
+            break;
     }
 }
 
